@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VoicePal</title>
+<style>
+body{font-family:sans-serif;background:#0f172a;color:white;text-align:center;padding:20px}
+h1{font-size:32px} button{padding:15px 25px;font-size:18px;border:none;border-radius:50px;margin:10px;cursor:pointer}
+#mic{background:#22c55e;color:white}
+#stop{background:#ef4444;color:white}
+#clear{background:#334155;color:white}
+#text{background:white;color:black;padding:15px;border-radius:15px;min-height:100px;text-align:left;margin-top:15px}
+.note{background:#1e293b;padding:12px;border-radius:12px;margin-top:10px;text-align:left}
+</style>
+</head>
+<body>
+<h1>🎤 VoicePal</h1>
+<p>Tap Start, speak, VoicePal writes it for you.</p>
+<button id="mic" onclick="start()">🎤 Start Speaking</button>
+<button id="stop" onclick="stop()">⏹ Stop</button>
+<button id="clear" onclick="clearAll()">Clear All</button>
+<div id="text">Your words will appear here...</div>
+<button onclick="saveNote()" style="background:#3b82f6;color:white">💾 Save Note</button>
+<h3>Your Saved Notes</h3>
+<div id="notes"></div>
+<script>
+let rec; let finalText="";
+function show(){let n=JSON.parse(localStorage.getItem("vp")||"[]");document.getElementById("notes").innerHTML=n.map((x,i)=>`<div class="note">${x}<br><small>${new Date().toLocaleString()}</small></div>`).join("")||"No notes yet";}
+show();
+function start(){
+  let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert("Use Chrome on Android for voice");return;}
+  rec=new SR(); rec.continuous=true; rec.interimResults=true; rec.lang="en-ZA";
+  rec.onresult=e=>{let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript; finalText=t; document.getElementById("text").innerText=t;};
+  rec.start(); document.getElementById("text").innerText="Listening... speak now...";
+}
+function stop(){if(rec)rec.stop();}
+function saveNote(){if(!finalText)return alert("Speak first!");let n=JSON.parse(localStorage.getItem("vp")||"[]");n.unshift(finalText);localStorage.setItem("vp",JSON.stringify(n));show();alert("Saved!");}
+function clearAll(){localStorage.removeItem("vp");show();document.getElementById("text").innerText="Your words will appear here...";}
+</script>
+</body>
+</html>
